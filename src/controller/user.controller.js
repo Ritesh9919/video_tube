@@ -1,6 +1,6 @@
 import e from 'express';
 import {User} from '../models/user.model.js';
-import {asyncHandler, ApiError, ApiResponse, uploadOnCloudinary} from '../utils/index.js';
+import {asyncHandler, ApiError, ApiResponse, uploadOnCloudinary, generateAccessAndRefreshTokens} from '../utils/index.js';
 
 
 
@@ -54,6 +54,46 @@ const registerUser = asyncHandler(async(req, res, next)=> {
 })
 
 
+const loginUser = asyncHandler(async(req, res)=> {
+    // get user details from fronted
+    const {email, username, password} = req.body;
+    // validation
+       if(!email || !username) {
+        throw new ApiError(400, "username or password is required");
+       }
+    // check if user exist
+      const user = await User.findOne({$or:[{email},{username}]});
+    // if user exist - then check password
+    if(!user) {
+        throw new ApiError(400, "user does not exist");
+    }
+    
+    // check user password
+    const isPasswordCorrect = await user.isPasswordCurrect(password);
+    if(!isPasswordCorrect) {
+        throw new ApiError(400, "Password is incorrect");
+    }
+
+    //generate access and refresh token and store refreshToken in database
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
+    // login user
+    const loginUser = await User.findOne(user._id).select("-password -refreshToken");
+
+    // return response with accessToken and refreshToken
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    return res.status(200)
+    .cookie("accessToken", accessToken)
+    .cookie("refreshToken", refreshToken)
+    .json(new ApiResponse(200, {user: loginUser, accessToken, refreshToken}, "Login successfull"));
+    
+})
+
+
 export {
-    registerUser
+    registerUser,
+    loginUser
 }

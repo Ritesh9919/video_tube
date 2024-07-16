@@ -62,13 +62,15 @@ userSchema.methods.isPasswordCurrect = async function(condidatePassword) {
     return await bcrypt.compare(condidatePassword, this.password);
 }
 
-userSchema.methods.generateAccessToken = function() {
-    return jwt.sign({userId:this._id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn:ACCESS_TOKEN_EXPIRY});
+userSchema.methods.generateAccessToken = async function() {
+  
+  
+  return await jwt.sign({userId:this._id}, process.env.ACCESS_TOKEN_SECRET, {expiresIn:process.env.ACCESS_TOKEN_EXPIRY});
 }
 
 
-userSchema.methods.generaterrRefreshToken = function() {
-    return jwt.sign({userId:this._id}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:REFRESH_TOKEN_EXPIRY});
+userSchema.methods.generateRefreshToken = async function() {
+    return await jwt.sign({userId:this._id}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:process.env.REFRESH_TOKEN_EXPIRY});
 }
 
 
