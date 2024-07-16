@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 import { app } from "./app.js";
 import {connectDB} from './db/connect.js';
-import {v2 as cloudinary} from 'cloudinary';
+
 
 dotenv.config({
     path: './.env'
 })
 
+import {v2 as cloudinary} from 'cloudinary';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
